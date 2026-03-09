@@ -6,6 +6,13 @@ Oura Ring API v2 を使ったチームウェルネスダッシュボード。
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8)
 
+## 開発者の健康状態
+
+| 開発者 | 睡眠 | 回復 | 活動 | 戦闘力 | ランク |
+|--------|------|------|------|--------|--------|
+| Kan | ![睡眠](https://oura-arena.vercel.app/api/badge/kan.svg?metric=sleep) | ![回復](https://oura-arena.vercel.app/api/badge/kan.svg?metric=readiness) | ![活動](https://oura-arena.vercel.app/api/badge/kan.svg?metric=activity) | ![戦闘力](https://oura-arena.vercel.app/api/badge/kan.svg?metric=power) | ![ランク](https://oura-arena.vercel.app/api/badge/kan.svg?metric=rank) |
+| Miyamae | ![睡眠](https://oura-arena.vercel.app/api/badge/miyamae.svg?metric=sleep) | ![回復](https://oura-arena.vercel.app/api/badge/miyamae.svg?metric=readiness) | ![活動](https://oura-arena.vercel.app/api/badge/miyamae.svg?metric=activity) | ![戦闘力](https://oura-arena.vercel.app/api/badge/miyamae.svg?metric=power) | ![ランク](https://oura-arena.vercel.app/api/badge/miyamae.svg?metric=rank) |
+
 ## プレビュー
 
 ![ダッシュボード](docs/screenshot.png)
