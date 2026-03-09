@@ -31,6 +31,13 @@ export function computePowerLevel(
   return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 }
 
+export function getRank(power: number): string {
+  if (power >= 85) return "S";
+  if (power >= 70) return "A";
+  if (power >= 50) return "B";
+  return "C";
+}
+
 export const conditionConfig: Record<
   ConditionLevel,
   { label: string; rank: string; color: string; accent: string }
