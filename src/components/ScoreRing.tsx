@@ -5,28 +5,30 @@ interface ScoreRingProps {
   size?: number;
   strokeWidth?: number;
   label: string;
+  color?: string;
 }
 
 function scoreColor(score: number): string {
-  if (score >= 85) return "#22c55e";
-  if (score >= 70) return "#84cc16";
-  if (score >= 50) return "#f59e0b";
-  return "#ef4444";
+  if (score >= 85) return "#facc15";
+  if (score >= 70) return "#34d399";
+  if (score >= 50) return "#fbbf24";
+  return "#f87171";
 }
 
 export default function ScoreRing({
   score,
-  size = 120,
-  strokeWidth = 8,
+  size = 100,
+  strokeWidth = 6,
   label,
+  color,
 }: ScoreRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = score != null ? (score / 100) * circumference : 0;
-  const color = score != null ? scoreColor(score) : "#e5e5e5";
+  const ringColor = color ?? (score != null ? scoreColor(score) : "#333");
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-1.5">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           <circle
@@ -34,7 +36,7 @@ export default function ScoreRing({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#f5f5f5"
+            stroke="#1f1f1f"
             strokeWidth={strokeWidth}
           />
           <circle
@@ -42,21 +44,26 @@ export default function ScoreRing({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke={color}
+            stroke={ringColor}
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
             strokeDashoffset={circumference - progress}
             strokeLinecap="round"
             className="transition-all duration-700 ease-out"
+            style={{
+              filter: `drop-shadow(0 0 6px ${ringColor}60)`,
+            }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-semibold tabular-nums">
+          <span className="text-2xl font-bold tabular-nums text-white">
             {score ?? "—"}
           </span>
         </div>
       </div>
-      <span className="text-sm text-neutral-500 font-medium">{label}</span>
+      <span className="text-xs text-neutral-500 font-medium uppercase tracking-wider">
+        {label}
+      </span>
     </div>
   );
 }

@@ -18,32 +18,45 @@ export function computeCondition(
   return "low";
 }
 
+export function computePowerLevel(
+  sleep: DailySleep | null,
+  readiness: DailyReadiness | null,
+  activity: import("./types").DailyActivity | null
+): number {
+  const scores: number[] = [];
+  if (sleep?.score != null) scores.push(sleep.score);
+  if (readiness?.score != null) scores.push(readiness.score);
+  if (activity?.score != null) scores.push(activity.score);
+  if (scores.length === 0) return 0;
+  return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+}
+
 export const conditionConfig: Record<
   ConditionLevel,
-  { label: string; emoji: string; color: string; bg: string }
+  { label: string; rank: string; color: string; glow: string }
 > = {
   great: {
-    label: "Feeling Great",
-    emoji: "✦",
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    label: "絶好調",
+    rank: "S",
+    color: "text-yellow-400",
+    glow: "shadow-yellow-400/30",
   },
   good: {
-    label: "Looking Good",
-    emoji: "○",
-    color: "text-lime-600",
-    bg: "bg-lime-50",
+    label: "好調",
+    rank: "A",
+    color: "text-emerald-400",
+    glow: "shadow-emerald-400/30",
   },
   fair: {
-    label: "Take It Easy",
-    emoji: "~",
-    color: "text-amber-600",
-    bg: "bg-amber-50",
+    label: "まあまあ",
+    rank: "B",
+    color: "text-amber-400",
+    glow: "shadow-amber-400/30",
   },
   low: {
-    label: "Rest Up",
-    emoji: "↓",
-    color: "text-red-500",
-    bg: "bg-red-50",
+    label: "休め",
+    rank: "C",
+    color: "text-red-400",
+    glow: "shadow-red-400/30",
   },
 };
