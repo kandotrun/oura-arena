@@ -1,4 +1,4 @@
-import type { ConditionLevel, DailySleep, DailyReadiness } from "./types";
+import type { ConditionLevel, DailySleep, DailyReadiness, DailyActivity } from "./types";
 
 export function computeCondition(
   sleep: DailySleep | null,
@@ -21,7 +21,7 @@ export function computeCondition(
 export function computePowerLevel(
   sleep: DailySleep | null,
   readiness: DailyReadiness | null,
-  activity: import("./types").DailyActivity | null
+  activity: DailyActivity | null
 ): number {
   const scores: number[] = [];
   if (sleep?.score != null) scores.push(sleep.score);
@@ -33,30 +33,30 @@ export function computePowerLevel(
 
 export const conditionConfig: Record<
   ConditionLevel,
-  { label: string; rank: string; color: string; glow: string }
+  { label: string; rank: string; color: string; accent: string }
 > = {
   great: {
     label: "絶好調",
     rank: "S",
-    color: "text-yellow-400",
-    glow: "shadow-yellow-400/30",
+    color: "text-amber-500",
+    accent: "#f59e0b",
   },
   good: {
     label: "好調",
     rank: "A",
-    color: "text-emerald-400",
-    glow: "shadow-emerald-400/30",
+    color: "text-emerald-500",
+    accent: "#10b981",
   },
   fair: {
     label: "まあまあ",
     rank: "B",
-    color: "text-amber-400",
-    glow: "shadow-amber-400/30",
+    color: "text-violet-500",
+    accent: "#8b5cf6",
   },
   low: {
-    label: "休め",
+    label: "お休みモード",
     rank: "C",
-    color: "text-red-400",
-    glow: "shadow-red-400/30",
+    color: "text-rose-400",
+    accent: "#fb7185",
   },
 };

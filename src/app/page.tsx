@@ -24,7 +24,6 @@ function buildTrend(user: UserHealth) {
 export default async function Home() {
   const users = await fetchAllUsers();
 
-  // Determine winner by power level
   const powers = users.map((u) =>
     computePowerLevel(u.sleep, u.readiness, u.activity)
   );
@@ -32,46 +31,40 @@ export default async function Home() {
   const hasMultiple = users.length > 1;
   const hasTie = hasMultiple && powers.filter((p) => p === maxPower).length > 1;
 
+  const trendColors = ["#6366f1", "#f43f5e", "#10b981", "#f59e0b"];
+
   return (
-    <main className="min-h-screen py-10 px-4 sm:px-8">
+    <main className="min-h-screen py-10 px-4 sm:px-6">
       {/* Header */}
-      <header className="max-w-6xl mx-auto mb-8 text-center">
-        <h1 className="text-4xl font-black tracking-tighter uppercase">
-          Health{" "}
-          <span className="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">
-            Battle
-          </span>
-        </h1>
-        <p className="text-neutral-600 text-sm mt-1 font-mono">
-          powered by Oura Ring
+      <header className="max-w-5xl mx-auto mb-8 text-center">
+        <p className="text-[10px] text-neutral-400 uppercase tracking-[0.3em] font-mono mb-1">
+          oura ring
         </p>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+          arena
+        </h1>
       </header>
 
-      {/* VS Battle Area */}
-      <div className="max-w-6xl mx-auto">
+      {/* Battle Area */}
+      <div className="max-w-5xl mx-auto">
         {users.length === 1 ? (
-          /* Solo mode */
-          <div className="max-w-md mx-auto">
+          <div className="max-w-sm mx-auto">
             <BattleCard user={users[0]} side="left" isWinner={false} />
           </div>
         ) : (
-          /* Battle mode */
-          <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+          <div className="flex flex-col lg:flex-row gap-5 items-stretch">
             <BattleCard
               user={users[0]}
               side="left"
               isWinner={!hasTie && powers[0] === maxPower}
             />
 
-            {/* VS Badge */}
-            <div className="flex items-center justify-center lg:flex-col">
-              <div className="animate-vs relative">
-                <div className="text-5xl font-black text-transparent bg-gradient-to-b from-red-500 to-orange-600 bg-clip-text drop-shadow-2xl">
-                  VS
-                </div>
-                <div className="absolute inset-0 text-5xl font-black text-red-500/20 blur-lg animate-pulse-glow">
-                  VS
-                </div>
+            {/* VS */}
+            <div className="flex items-center justify-center py-2 lg:py-0">
+              <div className="animate-vs animate-float">
+                <span className="text-3xl font-black text-neutral-300/60 tracking-tighter select-none">
+                  vs
+                </span>
               </div>
             </div>
 
@@ -83,39 +76,35 @@ export default async function Home() {
           </div>
         )}
 
-        {/* Draw */}
         {hasMultiple && hasTie && maxPower > 0 && (
-          <div className="text-center mt-6">
-            <span className="text-neutral-500 font-bold text-sm uppercase tracking-widest">
-              ⚔️ 引き分け ⚔️
+          <div className="text-center mt-5">
+            <span className="text-neutral-400 font-mono text-xs uppercase tracking-widest">
+              draw
             </span>
           </div>
         )}
       </div>
 
-      {/* Trend Charts */}
+      {/* Trends */}
       {users.some((u) => u.sleepTrend.length > 0) && (
-        <div className="max-w-6xl mx-auto mt-10">
-          <h2 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-4 text-center">
-            7日間トレンド
-          </h2>
+        <div className="max-w-5xl mx-auto mt-8">
+          <p className="text-[10px] text-neutral-400 uppercase tracking-[0.2em] font-mono mb-4 text-center">
+            7-day trend
+          </p>
           <div
-            className={`grid gap-6 ${
-              users.length > 1 ? "lg:grid-cols-2" : "max-w-md mx-auto"
+            className={`grid gap-4 ${
+              users.length > 1 ? "lg:grid-cols-2" : "max-w-sm mx-auto"
             }`}
           >
             {users.map((user, i) => (
-              <div
-                key={user.name}
-                className="bg-neutral-900 rounded-xl border border-neutral-800 p-5"
-              >
-                <h3 className="text-sm font-semibold uppercase tracking-wider mb-3 text-neutral-400">
+              <div key={user.name} className="glass rounded-xl p-4">
+                <p className="text-xs font-semibold tracking-tight mb-2 text-neutral-500">
                   {user.name}
-                </h3>
+                </p>
                 <TrendChart
                   data={buildTrend(user)}
                   label=""
-                  color={i === 0 ? "#6366f1" : "#f43f5e"}
+                  color={trendColors[i % trendColors.length]}
                 />
               </div>
             ))}
@@ -123,8 +112,10 @@ export default async function Home() {
         </div>
       )}
 
-      <footer className="max-w-6xl mx-auto mt-10 text-center text-xs text-neutral-700 font-mono">
-        5分ごとに更新 · Oura Ring API v2
+      <footer className="max-w-5xl mx-auto mt-10 text-center">
+        <span className="text-[10px] text-neutral-300 font-mono tracking-widest">
+          refresh · 5min
+        </span>
       </footer>
     </main>
   );

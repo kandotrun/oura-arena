@@ -27,123 +27,94 @@ export default function BattleCard({ user, side, isWinner }: BattleCardProps) {
   const slideClass =
     side === "left" ? "animate-slide-left" : "animate-slide-right";
 
-  const borderColor = isWinner
-    ? "border-yellow-400/40"
-    : "border-neutral-800";
-
-  const bgGlow = isWinner
-    ? "shadow-[0_0_40px_rgba(250,204,21,0.08)]"
-    : "";
+  const powerBarClass =
+    power >= 85 ? "power-bar-top" : power >= 70 ? "power-bar-high" : "power-bar";
 
   if (user.error) {
     return (
-      <div
-        className={`${slideClass} bg-neutral-900 rounded-2xl border ${borderColor} p-8 flex-1`}
-      >
-        <h2 className="text-2xl font-bold uppercase tracking-wider mb-2">
-          {user.name}
-        </h2>
-        <p className="text-neutral-500 text-sm">{user.error}</p>
+      <div className={`${slideClass} glass rounded-2xl p-6 flex-1`}>
+        <h2 className="text-lg font-semibold capitalize mb-2">{user.name}</h2>
+        <p className="text-neutral-400 text-sm">{user.error}</p>
       </div>
     );
   }
 
+  const stale = user.latestDay ? isStale(user.latestDay) : false;
+
   return (
     <div
-      className={`${slideClass} bg-neutral-900 rounded-2xl border ${borderColor} ${bgGlow} flex-1 overflow-hidden`}
+      className={`${slideClass} glass-strong rounded-2xl flex-1 overflow-hidden ${
+        isWinner ? "ring-2 ring-amber-400/50 shadow-lg shadow-amber-200/20" : "shadow-sm"
+      }`}
     >
-      {/* Stale data warning */}
-      {user.latestDay && isStale(user.latestDay) && (
-        <div className="px-6 pt-4 pb-0">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20">
-            <span className="text-amber-400 text-xs">⚠</span>
-            <span className="text-amber-400/80 text-[11px] font-medium">
-              {daysAgoLabel(user.latestDay)}のデータ
-            </span>
-          </div>
+      {/* Stale warning */}
+      {stale && user.latestDay && (
+        <div className="px-5 pt-4">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/60 text-amber-600 text-[11px] font-medium">
+            ⏰ {daysAgoLabel(user.latestDay)}のデータ
+          </span>
         </div>
       )}
 
-      {/* Header with rank */}
-      <div className="px-6 pt-4 pb-4 flex items-start justify-between">
+      {/* Header */}
+      <div className={`px-5 ${stale ? "pt-3" : "pt-5"} pb-3 flex items-start justify-between`}>
         <div>
-          <h2 className="text-2xl font-bold uppercase tracking-wider">
-            {user.name}
-          </h2>
-          <p className="text-neutral-600 text-xs mt-1 font-mono">
+          <h2 className="text-lg font-bold tracking-tight">{user.name}</h2>
+          <p className="text-neutral-400 text-[11px] mt-0.5 font-mono">
             {user.latestDay ?? "—"}
           </p>
         </div>
         <div className="flex flex-col items-center">
-          <div
-            className={`text-4xl font-black ${cfg.color} drop-shadow-lg`}
+          <span
+            className={`text-3xl font-black ${cfg.color}`}
+            style={{ lineHeight: 1 }}
           >
             {cfg.rank}
-          </div>
-          <span className={`text-xs font-semibold ${cfg.color} mt-0.5`}>
+          </span>
+          <span className="text-[10px] font-semibold text-neutral-400 mt-1">
             {cfg.label}
           </span>
         </div>
       </div>
 
-      {/* Power Level Bar */}
-      <div className="px-6 pb-4">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-neutral-500 uppercase tracking-wider font-medium">
-            戦闘力
+      {/* Power Level */}
+      <div className="px-5 pb-4">
+        <div className="flex items-baseline justify-between mb-1.5">
+          <span className="text-[10px] text-neutral-400 uppercase tracking-widest font-mono">
+            power
           </span>
-          <span className={`text-lg font-bold tabular-nums ${cfg.color}`}>
+          <span className="text-sm font-bold tabular-nums font-mono">
             {power}
           </span>
         </div>
-        <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-black/[0.04] rounded-full overflow-hidden">
           <div
-            className="h-full rounded-full transition-all duration-1000 ease-out"
-            style={{
-              width: `${power}%`,
-              background: `linear-gradient(90deg, ${
-                power >= 85
-                  ? "#facc15, #f59e0b"
-                  : power >= 70
-                  ? "#34d399, #22c55e"
-                  : power >= 50
-                  ? "#fbbf24, #f59e0b"
-                  : "#f87171, #ef4444"
-              })`,
-              boxShadow: `0 0 12px ${
-                power >= 85
-                  ? "rgba(250,204,21,0.4)"
-                  : power >= 70
-                  ? "rgba(52,211,153,0.4)"
-                  : power >= 50
-                  ? "rgba(251,191,36,0.4)"
-                  : "rgba(248,113,113,0.4)"
-              }`,
-            }}
+            className={`h-full rounded-full ${powerBarClass} transition-all duration-1000 ease-out`}
+            style={{ width: `${power}%` }}
           />
         </div>
       </div>
 
-      {/* Score Rings */}
-      <div className="px-6 py-5 flex justify-center gap-6 border-t border-neutral-800">
+      {/* Scores */}
+      <div className="px-5 py-4 flex justify-center gap-5 border-t border-black/[0.04]">
         <ScoreRing score={user.sleep?.score ?? null} label="睡眠" />
         <ScoreRing score={user.readiness?.score ?? null} label="回復" />
         <ScoreRing score={user.activity?.score ?? null} label="活動" />
       </div>
 
-      {/* Stats Grid */}
-      <div className="px-6 py-4 grid grid-cols-2 gap-4 border-t border-neutral-800">
-        <Stat label="歩数" value={steps.toLocaleString()} />
-        <Stat label="消費" value={`${calories.toLocaleString()} kcal`} />
-        <Stat label="心拍" value={latestHR ? `${latestHR} bpm` : "—"} />
-        <Stat label="安静時" value={restingHR ? `${restingHR} bpm` : "—"} />
+      {/* Stats */}
+      <div className="px-5 py-3.5 grid grid-cols-2 gap-3 border-t border-black/[0.04]">
+        <Stat label="steps" value={steps.toLocaleString()} />
+        <Stat label="cal" value={`${calories}`} unit="kcal" />
+        <Stat label="hr" value={latestHR ? `${latestHR}` : "—"} unit={latestHR ? "bpm" : undefined} />
+        <Stat label="resting" value={restingHR ? `${restingHR}` : "—"} unit={restingHR ? "bpm" : undefined} />
       </div>
 
-      {/* Winner crown */}
+      {/* Winner */}
       {isWinner && (
-        <div className="px-6 py-3 border-t border-yellow-400/20 bg-yellow-400/5 text-center">
-          <span className="text-yellow-400 text-sm font-bold tracking-wider">
-            👑 勝利
+        <div className="px-5 py-2.5 border-t border-amber-200/40 bg-amber-50/50 text-center">
+          <span className="text-amber-600 text-xs font-bold tracking-widest uppercase">
+            👑 winner
           </span>
         </div>
       )}
@@ -172,15 +143,26 @@ function daysAgoLabel(day: string): string {
   return `約${years}年${remainMonths}ヶ月前`;
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  unit,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+}) {
   return (
     <div>
-      <span className="text-[10px] text-neutral-600 uppercase tracking-wider font-medium">
+      <span className="text-[10px] text-neutral-400 uppercase tracking-widest font-mono">
         {label}
       </span>
-      <p className="text-sm font-semibold text-neutral-300 tabular-nums mt-0.5">
-        {value}
-      </p>
+      <div className="flex items-baseline gap-1 mt-0.5">
+        <span className="text-sm font-semibold tabular-nums">{value}</span>
+        {unit && (
+          <span className="text-[10px] text-neutral-400">{unit}</span>
+        )}
+      </div>
     </div>
   );
 }
