@@ -14,6 +14,8 @@ import WorkoutList from "@/components/WorkoutList";
 import SleepTimeline from "@/components/SleepTimeline";
 import BedtimeChart from "@/components/BedtimeChart";
 import ActivityTimeline from "@/components/ActivityTimeline";
+import DayOfWeekChart from "@/components/DayOfWeekChart";
+import PersonalBests from "@/components/PersonalBests";
 
 export const revalidate = 300;
 
@@ -128,6 +130,37 @@ export default async function UserDetailPage({
   const avgBedtimeStr = avgBedtime != null
     ? `${Math.floor(avgBedtime >= 24 ? avgBedtime - 24 : avgBedtime).toString().padStart(2, "0")}:${Math.round(((avgBedtime >= 24 ? avgBedtime - 24 : avgBedtime) % 1) * 60).toString().padStart(2, "0")}`
     : "—";
+
+  // HRV trend from sleep details
+  const hrvTrend = sleepDetailsLong
+    .filter((s) => s.average_hrv != null)
+    .map((s) => ({ day: s.day, value: s.average_hrv }));
+
+  // Breathing rate trend
+  const breathTrend = sleepDetailsLong
+    .filter((s) => s.average_breath != null)
+    .map((s) => ({ day: s.day, value: Math.round((s.average_breath ?? 0) * 10) / 10 }));
+
+  // Resting HR trend (lowest during sleep)
+  const restingHRTrend = sleepDetailsLong
+    .filter((s) => s.lowest_heart_rate != null)
+    .map((s) => ({ day: s.day, value: s.lowest_heart_rate }));
+
+  // Restless periods trend
+  const restlessTrend = sleepDetailsLong
+    .filter((s) => s.restless_periods != null)
+    .map((s) => ({ day: s.day, value: s.restless_periods }));
+
+  // Sleep regularity (std dev of bedtime)
+  const bedtimeHours = sleepDetailsLong.map((s) => {
+    const h = new Date(s.bedtime_start).getHours() + new Date(s.bedtime_start).getMinutes() / 60;
+    return h < 18 ? h + 24 : h;
+  });
+  const avgBedtimeAll = bedtimeHours.length > 0 ? bedtimeHours.reduce((a, b) => a + b, 0) / bedtimeHours.length : 0;
+  const bedtimeStdDev = bedtimeHours.length > 1
+    ? Math.sqrt(bedtimeHours.reduce((sum, h) => sum + (h - avgBedtimeAll) ** 2, 0) / bedtimeHours.length)
+    : 0;
+  const regularityScore = Math.max(0, Math.round(100 - bedtimeStdDev * 20));
 
   // Latest sleep detail
   const latestSleepDetail = sleepDetails.at(-1);
@@ -252,6 +285,9 @@ export default async function UserDetailPage({
                 <span className="text-xs text-slate-400">
                   平均就寝 <strong className="text-slate-600">{avgBedtimeStr}</strong>
                 </span>
+                <span className="text-xs text-slate-400">
+                  規則性 <strong className="text-slate-600">{regularityScore}/100</strong>
+                </span>
               </div>
             </div>
 
@@ -283,6 +319,82 @@ export default async function UserDetailPage({
             </div>
           </div>
         )}
+
+        {/* Vitals: HRV, Breathing, Resting HR, Restless */}
+        <div className="card rounded-2xl p-6">
+          <h2 className="text-sm font-bold mb-4">バイタルトレンド</h2>
+          <div className="space-y-6">
+            {hrvTrend.length > 0 && (
+              <HistoryChart
+                data={hrvTrend}
+                color="#8b5cf6"
+                title="HRV（心拍変動）"
+                unit="ms"
+                domain={[0, Math.max(...hrvTrend.map((d) => d.value ?? 0), 100)]}
+              />
+            )}
+            {restingHRTrend.length > 0 && (
+              <HistoryChart
+                data={restingHRTrend}
+                color="#ec4899"
+                title="安静時心拍"
+                unit="bpm"
+                domain={[
+                  Math.max(0, Math.min(...restingHRTrend.map((d) => d.value ?? 100)) - 5),
+                  Math.max(...restingHRTrend.map((d) => d.value ?? 0)) + 5,
+                ]}
+              />
+            )}
+            {breathTrend.length > 0 && (
+              <HistoryChart
+                data={breathTrend}
+                color="#06b6d4"
+                title="呼吸数"
+                unit="回/分"
+                domain={[
+                  Math.max(0, Math.min(...breathTrend.map((d) => d.value ?? 20)) - 2),
+                  Math.max(...breathTrend.map((d) => d.value ?? 0)) + 2,
+                ]}
+              />
+            )}
+            {restlessTrend.length > 0 && (
+              <HistoryChart
+                data={restlessTrend}
+                color="#f59e0b"
+                title="中途覚醒回数"
+                unit="回"
+                domain={[0, Math.max(...restlessTrend.map((d) => d.value ?? 0), 30)]}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Personal Bests */}
+        <div className="card rounded-2xl p-6">
+          <h2 className="text-sm font-bold mb-4">🏆 パーソナルベスト</h2>
+          <PersonalBests
+            sleepHistory={sleepHistory}
+            activityHistory={activityHistory}
+            sleepDetails={sleepDetailsLong}
+          />
+        </div>
+
+        {/* Day of week patterns */}
+        <div className="card rounded-2xl p-6">
+          <h2 className="text-sm font-bold mb-4">曜日別パターン</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            <DayOfWeekChart
+              data={sleepHistory.map((s) => ({ day: s.day, score: s.score }))}
+              title="睡眠スコア"
+              color="#6366f1"
+            />
+            <DayOfWeekChart
+              data={activityHistory.map((a) => ({ day: a.day, score: a.score }))}
+              title="活動スコア"
+              color="#f59e0b"
+            />
+          </div>
+        </div>
 
         {/* Activity Timeline */}
         {workouts.length > 0 && (

@@ -49,6 +49,7 @@ export interface SleepDetail {
   lowest_heart_rate: number | null;
   average_hrv: number | null;
   average_breath: number | null;
+  restless_periods: number | null;
   type: string;
   day: string;
 }

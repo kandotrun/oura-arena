@@ -2,6 +2,7 @@ import { fetchAllUsers } from "@/lib/fetchAllUsers";
 import { computePowerLevel } from "@/lib/condition";
 import BattleCard from "@/components/BattleCard";
 import TrendChart from "@/components/TrendChart";
+import WinStreak from "@/components/WinStreak";
 import type { UserHealth } from "@/lib/types";
 
 export const revalidate = 300;
@@ -76,6 +77,13 @@ export default async function Home() {
           </div>
         )}
       </div>
+
+      {/* Win Streak */}
+      {hasMultiple && (
+        <div className="max-w-6xl mx-auto mt-4">
+          <WinStreak users={users} />
+        </div>
+      )}
 
       {/* Trends */}
       {users.some((u) => u.sleepTrend.length > 0) && (
