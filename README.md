@@ -6,6 +6,12 @@ Team wellness dashboard powered by Oura Ring API v2.
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8)
 
+## Preview
+
+![Dashboard Screenshot](docs/screenshot.png)
+
+*Data will populate once Oura Ring is paired and synced.*
+
 ## Features
 
 - **Score Rings** — Sleep, Readiness, Activity scores at a glance

@@ -18,15 +18,19 @@ export default function UserCard({ user }: UserCardProps) {
     );
   }
 
-  const latestHR =
-    user.heartRate.length > 0
-      ? user.heartRate[user.heartRate.length - 1].bpm
-      : null;
+  // Latest reading (sorted by timestamp desc)
+  const sortedHR = [...user.heartRate].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+  const latestHR = sortedHR[0]?.bpm ?? null;
 
-  // Compute resting HR as min from today's readings
+  // Resting HR: minimum from rest/sleep source readings
+  const restingEntries = user.heartRate.filter(
+    (h) => h.source === "rest" || h.source === "sleep"
+  );
   const restingHR =
-    user.heartRate.length > 0
-      ? Math.min(...user.heartRate.map((h) => h.bpm))
+    restingEntries.length > 0
+      ? Math.min(...restingEntries.map((h) => h.bpm))
       : null;
 
   const steps = user.activity?.steps ?? 0;
@@ -56,31 +60,49 @@ export default function UserCard({ user }: UserCardProps) {
       </div>
 
       {/* Stats */}
-      <div className="px-8 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6 border-t border-neutral-100">
+      <div className="px-8 py-5 grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4 border-t border-neutral-100">
         <StatItem label="Steps" value={steps.toLocaleString()} />
-        <StatItem label="Calories" value={calories.toLocaleString()} unit="kcal" />
-        <StatItem label="Distance" value={distance} unit="km" />
         <StatItem
-          label="Heart Rate"
-          value={latestHR ?? "—"}
-          unit={latestHR ? "bpm" : undefined}
+          label="Active Cal"
+          value={calories.toLocaleString()}
+          unit="kcal"
         />
-      </div>
-
-      {/* Resting HR */}
-      {restingHR && (
-        <div className="px-8 pb-2">
-          <span className="text-xs text-neutral-400">
-            Resting HR: {restingHR} bpm
+        <StatItem label="Distance" value={distance} unit="km" />
+        <div className="flex flex-col">
+          <span className="text-xs text-neutral-400 uppercase tracking-wider font-medium">
+            Heart Rate
           </span>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-xl font-semibold tabular-nums">
+              {latestHR ?? "—"}
+            </span>
+            {latestHR && (
+              <span className="text-sm text-neutral-400">bpm</span>
+            )}
+          </div>
+          {restingHR && (
+            <span className="text-xs text-neutral-400 mt-0.5">
+              Resting: {restingHR}
+            </span>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Trend */}
       <div className="px-8 py-6 border-t border-neutral-100">
-        <h3 className="text-sm font-medium text-neutral-500 mb-3">
-          7-Day Trend
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-neutral-500">7-Day Trend</h3>
+          <div className="flex items-center gap-3 text-xs text-neutral-400">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-0.5 rounded bg-indigo-400" />
+              Sleep
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-0.5 rounded bg-emerald-400" />
+              Readiness
+            </span>
+          </div>
+        </div>
         <TrendChart data={trendData} />
       </div>
     </div>
