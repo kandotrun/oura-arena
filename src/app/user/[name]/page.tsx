@@ -149,11 +149,11 @@ export default async function UserDetailPage({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <DetailStat
                 label="就寝"
-                value={new Date(latestSleepDetail.bedtime_start).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}
+                value={new Date(latestSleepDetail.bedtime_start).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tokyo" })}
               />
               <DetailStat
                 label="起床"
-                value={new Date(latestSleepDetail.bedtime_end).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}
+                value={new Date(latestSleepDetail.bedtime_end).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tokyo" })}
               />
               <DetailStat
                 label="睡眠時間"
