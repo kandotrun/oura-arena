@@ -52,8 +52,20 @@ export default function BattleCard({ user, side, isWinner }: BattleCardProps) {
     <div
       className={`${slideClass} bg-neutral-900 rounded-2xl border ${borderColor} ${bgGlow} flex-1 overflow-hidden`}
     >
+      {/* Stale data warning */}
+      {user.latestDay && isStale(user.latestDay) && (
+        <div className="px-6 pt-4 pb-0">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20">
+            <span className="text-amber-400 text-xs">⚠</span>
+            <span className="text-amber-400/80 text-[11px] font-medium">
+              {daysAgoLabel(user.latestDay)}のデータ
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Header with rank */}
-      <div className="px-6 pt-6 pb-4 flex items-start justify-between">
+      <div className="px-6 pt-4 pb-4 flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold uppercase tracking-wider">
             {user.name}
@@ -137,6 +149,27 @@ export default function BattleCard({ user, side, isWinner }: BattleCardProps) {
       )}
     </div>
   );
+}
+
+function isStale(day: string): boolean {
+  const now = new Date();
+  const dataDate = new Date(day + "T00:00:00");
+  const diffMs = now.getTime() - dataDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return diffDays > 1;
+}
+
+function daysAgoLabel(day: string): string {
+  const now = new Date();
+  const dataDate = new Date(day + "T00:00:00");
+  const diffMs = now.getTime() - dataDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 30) return `${diffDays}日前`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}ヶ月前`;
+  const years = Math.floor(diffDays / 365);
+  const remainMonths = Math.floor((diffDays % 365) / 30);
+  if (remainMonths === 0) return `${years}年前`;
+  return `約${years}年${remainMonths}ヶ月前`;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
