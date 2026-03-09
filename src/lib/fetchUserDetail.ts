@@ -71,6 +71,7 @@ export interface UserDetailData {
   readinessHistory: DailyReadiness[];
   activityHistory: DailyActivity[];
   sleepDetails: SleepDetail[];
+  sleepDetailsLong: SleepDetail[];
   workouts: WorkoutEntry[];
   heartRateDay: HeartRateEntry[];
 }
@@ -203,6 +204,10 @@ export async function fetchUserDetail(
     readinessHistory,
     activityHistory,
     sleepDetails: sleepDetails.filter((s) => s.type === "long_sleep" || s.type === "sleep"),
+    sleepDetailsLong: await ouraFetchRaw<SleepDetail>("sleep", token, {
+      start_date: historyStart,
+      end_date: latestDay,
+    }).then((d) => d.filter((s) => s.type === "long_sleep" || s.type === "sleep")),
     workouts,
     heartRateDay,
   };

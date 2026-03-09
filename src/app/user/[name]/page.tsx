@@ -11,6 +11,9 @@ import SleepStagesChart from "@/components/SleepStagesChart";
 import ContributorsChart from "@/components/ContributorsChart";
 import TrendChart from "@/components/TrendChart";
 import WorkoutList from "@/components/WorkoutList";
+import SleepTimeline from "@/components/SleepTimeline";
+import BedtimeChart from "@/components/BedtimeChart";
+import ActivityTimeline from "@/components/ActivityTimeline";
 
 export const revalidate = 300;
 
@@ -28,7 +31,7 @@ export default async function UserDetailPage({
   const detail = await fetchUserDetail(name);
   if (!detail) notFound();
 
-  const { user, sleepHistory, readinessHistory, activityHistory, sleepDetails, workouts, heartRateDay } = detail;
+  const { user, sleepHistory, readinessHistory, activityHistory, sleepDetails, sleepDetailsLong, workouts, heartRateDay } = detail;
   const cfg = conditionConfig[user.condition];
   const power = computePowerLevel(user.sleep, user.readiness, user.activity);
 
@@ -79,6 +82,52 @@ export default async function UserDetailPage({
     light: s.light_sleep_duration,
     awake: s.awake_time,
   }));
+
+  // Sleep timeline data (90 days)
+  const sleepTimelineData = sleepDetailsLong.map((s) => {
+    const bedtime = new Date(s.bedtime_start);
+    const wake = new Date(s.bedtime_end);
+    const bedHour = bedtime.getHours() + bedtime.getMinutes() / 60;
+    const wakeHour = wake.getHours() + wake.getMinutes() / 60;
+    const durationHours = s.total_sleep_duration / 3600;
+    return {
+      day: s.day,
+      bedtimeHour: bedHour,
+      wakeHour: wakeHour,
+      duration: durationHours,
+      score: null as number | null,
+    };
+  });
+
+  // Match scores from sleepHistory
+  const scoreMap = new Map(sleepHistory.map((s) => [s.day, s.score]));
+  sleepTimelineData.forEach((d) => {
+    d.score = scoreMap.get(d.day) ?? null;
+  });
+
+  // Bedtime/wake trend (last 30 entries)
+  const bedtimeTrend = sleepTimelineData.slice(-30).map((d) => ({
+    day: d.day,
+    bedtimeHour: d.bedtimeHour,
+    wakeHour: d.wakeHour,
+  }));
+
+  // Sleep duration trend
+  const durationTrend = sleepTimelineData.map((d) => ({
+    day: d.day,
+    value: Math.round(d.duration * 10) / 10,
+  }));
+
+  // Average sleep stats
+  const avgDuration = sleepTimelineData.length > 0
+    ? (sleepTimelineData.reduce((a, b) => a + b.duration, 0) / sleepTimelineData.length).toFixed(1)
+    : "—";
+  const avgBedtime = sleepTimelineData.length > 0
+    ? sleepTimelineData.reduce((a, b) => a + (b.bedtimeHour < 18 ? b.bedtimeHour + 24 : b.bedtimeHour), 0) / sleepTimelineData.length
+    : null;
+  const avgBedtimeStr = avgBedtime != null
+    ? `${Math.floor(avgBedtime >= 24 ? avgBedtime - 24 : avgBedtime).toString().padStart(2, "0")}:${Math.round(((avgBedtime >= 24 ? avgBedtime - 24 : avgBedtime) % 1) * 60).toString().padStart(2, "0")}`
+    : "—";
 
   // Latest sleep detail
   const latestSleepDetail = sleepDetails.at(-1);
@@ -188,6 +237,63 @@ export default async function UserDetailPage({
           <div className="card rounded-2xl p-6">
             <h2 className="text-sm font-bold mb-4">睡眠ステージ（直近7日）</h2>
             <SleepStagesChart data={sleepStagesData} />
+          </div>
+        )}
+
+        {/* Sleep Analysis */}
+        {sleepTimelineData.length > 0 && (
+          <div className="card rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold">睡眠分析</h2>
+              <div className="flex gap-4">
+                <span className="text-xs text-slate-400">
+                  平均睡眠 <strong className="text-slate-600">{avgDuration}h</strong>
+                </span>
+                <span className="text-xs text-slate-400">
+                  平均就寝 <strong className="text-slate-600">{avgBedtimeStr}</strong>
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Bedtime / Wake time trends */}
+              <div>
+                <h3 className="text-xs font-semibold text-slate-500 mb-2">
+                  就寝・起床時刻の推移
+                </h3>
+                <BedtimeChart data={bedtimeTrend} />
+              </div>
+
+              {/* Sleep duration */}
+              <HistoryChart
+                data={durationTrend}
+                color="#6366f1"
+                title="睡眠時間"
+                unit="h"
+                domain={[0, Math.max(...durationTrend.map((d) => d.value ?? 0), 12)]}
+              />
+
+              {/* Sleep timeline (last 14 days) */}
+              <div>
+                <h3 className="text-xs font-semibold text-slate-500 mb-2">
+                  睡眠タイムライン（直近14日）
+                </h3>
+                <SleepTimeline data={sleepTimelineData.slice(-14)} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Activity Timeline */}
+        {workouts.length > 0 && (
+          <div className="card rounded-2xl p-6">
+            <h2 className="text-sm font-bold mb-4">
+              アクティビティ時間帯
+              <span className="text-slate-400 font-normal ml-2 text-xs">
+                いつ運動したか
+              </span>
+            </h2>
+            <ActivityTimeline workouts={workouts.slice(-60)} />
           </div>
         )}
 
