@@ -39,13 +39,48 @@ Oura Ring API v2 を使ったチームウェルネスダッシュボード。
 - **体温偏差トレンド**
 - **Gen4データ** — SpO2、ストレス、回復力、血管年齢、VO2 Max
 
+### 称号システム
+データから自動判定される称号。ホバーで取得条件を表示。
+
+| 称号 | 条件 |
+|------|------|
+| 😴 安眠の達人 | 7日間平均睡眠スコア85+ |
+| 🦉 夜更かしの帝王 | 7日間平均睡眠スコア50未満 |
+| 🌙 早寝の鬼 | 平均就寝23時前 |
+| 🌃 深夜族 | 平均就寝2時以降 |
+| 💎 睡眠効率マスター | 平均効率92%+ |
+| 🌊 深海の眠り手 | 平均深い睡眠90分+ |
+| 💓 HRV王 | 平均HRV 80ms+ |
+| 🚶 歩数マシーン | 7日間平均1万歩+ |
+| 👟 ウォーカー | 7日間平均7000歩+ |
+| 🔥 カロリーバーナー | 平均消費500kcal+ |
+| 🏆 2万歩の壁突破 | 最高歩数2万歩+ |
+| ⚡ 連勝街道 | 7日連続Good Sleep |
+| 🎯 リズムキーパー | 就寝時刻のブレ30分未満 |
+| 🌱 ルーキー | データ蓄積中 |
+
+### 体調カレンダー（GitHub草風）
+全期間の睡眠・活動スコアをGitHub Contributions風ヒートマップで表示。
+
+![睡眠カレンダー](https://oura-arena.vercel.app/api/badge/miyamae/calendar?metric=sleep)
+
+### ストレスバトル
+- ストレス時間 vs 回復時間を可視化
+- 状態判定（🧘回復済み / 😌通常 / 😰ストレスフル）
+- レジリエンス（回復力）レベル表示
+- ※ Gen3以降のリングが必要
+
 ### GitHub連携
 - **SVGカード** — `GET /api/card/[name].svg` でプロフィールREADMEに埋め込めるヘルスカード
 - **バッジ** — `GET /api/badge/[name].svg?metric=sleep|readiness|activity|power|steps|rank`
+- **称号バッジ** — `GET /api/badge/[name]/titles`
+- **カレンダーバッジ** — `GET /api/badge/[name]/calendar?metric=sleep|activity&weeks=26`
 
 ```markdown
 ![Health](https://oura-arena.vercel.app/api/card/kan.svg)
 ![睡眠](https://oura-arena.vercel.app/api/badge/kan.svg?metric=sleep)
+![称号](https://oura-arena.vercel.app/api/badge/kan/titles)
+![睡眠カレンダー](https://oura-arena.vercel.app/api/badge/kan/calendar?metric=sleep)
 ```
 
 ## セットアップ
