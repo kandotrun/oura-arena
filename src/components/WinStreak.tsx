@@ -8,10 +8,12 @@ interface Props {
 export default function WinStreak({ users }: Props) {
   if (users.length < 2) return null;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
 
-  // 今日のデータがある人だけでバトル判定
-  const todayUsers = users.filter((u) => u.latestDay === today);
+  // 今日または昨日のデータがある人だけでバトル判定
+  const todayUsers = users.filter((u) => u.latestDay === today || u.latestDay === yesterday);
   if (todayUsers.length < 2) return null;
 
   const powers = todayUsers.map((u) =>

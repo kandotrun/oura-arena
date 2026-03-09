@@ -25,12 +25,14 @@ function buildTrend(user: UserHealth) {
 export default async function Home() {
   const users = await fetchAllUsers();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
 
-  // 今日のデータがある人だけバトル対象
+  // 今日または昨日のデータがある人だけバトル対象
   const powers = users.map((u) => {
-    const isTodayData = u.latestDay === today;
-    return isTodayData ? computePowerLevel(u.sleep, u.readiness, u.activity) : 0;
+    const isRecent = u.latestDay === today || u.latestDay === yesterday;
+    return isRecent ? computePowerLevel(u.sleep, u.readiness, u.activity) : 0;
   });
   const activePowers = powers.filter((p) => p > 0);
   const maxPower = activePowers.length > 0 ? Math.max(...activePowers) : 0;

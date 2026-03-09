@@ -44,8 +44,11 @@ export default function BattleCard({ user, isWinner }: BattleCardProps) {
     );
   }
 
-  // 今日のデータがない場合は同期促すカードを表示
-  if (stale && user.latestDay) {
+  // 2日以上前のデータの場合は同期促すカードを表示
+  const now = new Date();
+  const yesterdayStr = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
+  const isOld = stale && user.latestDay !== yesterdayStr;
+  if (isOld && user.latestDay) {
     return (
       <div className="card p-6 flex-1 animate-fade-up">
         <div className="flex items-center justify-between mb-3">
