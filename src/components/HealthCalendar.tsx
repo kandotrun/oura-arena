@@ -169,9 +169,7 @@ export default function HealthCalendar({ data, title = "体調カレンダー" }
                   fill={scoreColor(d.score)}
                   opacity={scoreOpacity(d.score)}
                 >
-                  <title>
-                    {d.day}: {d.score != null ? d.score : "データなし"}
-                  </title>
+                  <title>{`${d.day}: ${d.score != null ? d.score : "データなし"}`}</title>
                 </rect>
               );
             })

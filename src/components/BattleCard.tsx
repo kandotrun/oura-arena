@@ -57,7 +57,7 @@ export default function BattleCard({ user, isWinner }: BattleCardProps) {
             {daysAgoLabel(user.latestDay)}前
           </span>
         </div>
-        <div className="flex flex-col items-center justify-center py-8 text-center">
+        <div className="flex flex-col items-center justify-center py-4 text-center">
           <span className="text-3xl mb-3">📡</span>
           <p className="text-sm font-medium text-slate-600 mb-1">
             今日のデータがありません
@@ -187,18 +187,18 @@ export default function BattleCard({ user, isWinner }: BattleCardProps) {
 
       {/* Gen4 row */}
       {(user.spo2 || user.stress || user.resilience || user.cardiovascularAge || user.vo2Max) && (
-        <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+        <div className="px-4 pb-4 flex flex-wrap gap-2">
           {user.spo2?.spo2_percentage && (
-            <MiniMetric label="血中酸素" value={`${user.spo2.spo2_percentage.average}`} unit="%" icon="🫁" color="#06b6d4" />
+            <div className="w-[calc(50%-0.25rem)]"><MiniMetric label="血中酸素" value={`${user.spo2.spo2_percentage.average}`} unit="%" icon="🫁" color="#06b6d4" /></div>
           )}
           {user.stress?.day_summary && (
-            <MiniMetric label="ストレス" value={user.stress.day_summary} icon="🧠" color="#f59e0b" />
+            <div className="w-[calc(50%-0.25rem)]"><MiniMetric label="ストレス" value={user.stress.day_summary} icon="🧠" color="#f59e0b" /></div>
           )}
           {user.cardiovascularAge?.vascular_age != null && (
-            <MiniMetric label="血管年齢" value={`${user.cardiovascularAge.vascular_age}`} unit="歳" icon="🫀" color="#ef4444" />
+            <div className="w-[calc(50%-0.25rem)]"><MiniMetric label="血管年齢" value={`${user.cardiovascularAge.vascular_age}`} unit="歳" icon="🫀" color="#ef4444" /></div>
           )}
           {user.vo2Max?.vo2_max != null && (
-            <MiniMetric label="VO2 Max" value={`${user.vo2Max.vo2_max}`} icon="🏃" color="#22c55e" />
+            <div className="w-[calc(50%-0.25rem)]"><MiniMetric label="VO2 Max" value={`${user.vo2Max.vo2_max}`} icon="🏃" color="#22c55e" /></div>
           )}
         </div>
       )}

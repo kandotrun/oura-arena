@@ -193,12 +193,12 @@ export default async function UserDetailPage({
           href="/"
           className="text-xs text-slate-400 hover:text-slate-600 transition font-mono"
         >
-          ← arena
+          ← ダッシュボード
         </Link>
       </div>
 
       {/* Header */}
-      <header className="max-w-5xl mx-auto mb-8">
+      <header className="max-w-5xl mx-auto mb-4">
         <div className="card rounded-2xl p-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight capitalize">
@@ -230,11 +230,26 @@ export default async function UserDetailPage({
             </div>
           </div>
         </div>
+        <p className="text-[10px] text-slate-400 mt-2 text-right font-mono">
+          S(85+)　A(70+)　B(50+)　C(〜49)
+        </p>
       </header>
+
+      {/* Sticky section nav */}
+      <nav className="sticky top-0 z-30 bg-white/80 backdrop-blur-sm border-b border-slate-100 mb-6">
+        <div className="max-w-5xl mx-auto flex gap-4 overflow-x-auto py-2 px-4 text-xs text-slate-500 font-medium">
+          <a href="#overview" className="hover:text-slate-800 transition whitespace-nowrap">概要</a>
+          <a href="#sleep" className="hover:text-slate-800 transition whitespace-nowrap">睡眠</a>
+          <a href="#activity" className="hover:text-slate-800 transition whitespace-nowrap">活動</a>
+          <a href="#vitals" className="hover:text-slate-800 transition whitespace-nowrap">バイタル</a>
+          <a href="#calendar" className="hover:text-slate-800 transition whitespace-nowrap">カレンダー</a>
+          <a href="#bests" className="hover:text-slate-800 transition whitespace-nowrap">ベスト</a>
+        </div>
+      </nav>
 
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Score rings row */}
-        <div className="card rounded-2xl p-6">
+        <div id="overview" className="card rounded-2xl p-6 scroll-mt-12">
           <div className="flex justify-center gap-8">
             <ScoreRing score={user.sleep?.score ?? null} label="睡眠" size={100} />
             <ScoreRing score={user.readiness?.score ?? null} label="回復" size={100} />
@@ -244,8 +259,8 @@ export default async function UserDetailPage({
 
         {/* Latest sleep detail */}
         {latestSleepDetail && (
-          <div className="card rounded-2xl p-6">
-            <h2 className="text-sm font-bold mb-4">最新の睡眠データ</h2>
+          <div id="sleep" className="card rounded-2xl p-6 scroll-mt-12">
+            <h2 className="text-sm font-bold mb-4">🌙 最新の睡眠データ</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <DetailStat
                 label="就寝"
@@ -286,7 +301,7 @@ export default async function UserDetailPage({
         {/* Sleep stages chart */}
         {sleepStagesData.length > 0 && (
           <div className="card rounded-2xl p-6">
-            <h2 className="text-sm font-bold mb-4">睡眠ステージ（直近7日）</h2>
+            <h2 className="text-sm font-bold mb-4">🛏️ 睡眠ステージ（直近7日）</h2>
             <SleepStagesChart data={sleepStagesData} />
           </div>
         )}
@@ -295,7 +310,7 @@ export default async function UserDetailPage({
         {sleepTimelineData.length > 0 && (
           <div className="card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold">睡眠分析</h2>
+              <h2 className="text-sm font-bold">📊 睡眠分析</h2>
               <div className="flex gap-4">
                 <span className="text-xs text-slate-400">
                   平均睡眠 <strong className="text-slate-600">{avgDuration}h</strong>
@@ -339,8 +354,8 @@ export default async function UserDetailPage({
         )}
 
         {/* Vitals: HRV, Breathing, Resting HR, Restless */}
-        <div className="card rounded-2xl p-6">
-          <h2 className="text-sm font-bold mb-4">バイタルトレンド</h2>
+        <div id="vitals" className="card rounded-2xl p-6 scroll-mt-12">
+          <h2 className="text-sm font-bold mb-4">💓 バイタルトレンド</h2>
           <div className="space-y-6">
             {hrvTrend.length > 0 && (
               <HistoryChart
@@ -388,7 +403,7 @@ export default async function UserDetailPage({
         </div>
 
         {/* Personal Bests */}
-        <div className="card rounded-2xl p-6">
+        <div id="bests" className="card rounded-2xl p-6 scroll-mt-12">
           <h2 className="text-sm font-bold mb-4">🏆 パーソナルベスト</h2>
           <PersonalBests
             sleepHistory={sleepHistory}
@@ -398,8 +413,8 @@ export default async function UserDetailPage({
         </div>
 
         {/* Health Calendar */}
-        <div className="card rounded-2xl p-6">
-          <h2 className="text-sm font-bold mb-4">体調カレンダー</h2>
+        <div id="calendar" className="card rounded-2xl p-6 scroll-mt-12">
+          <h2 className="text-sm font-bold mb-4">📅 体調カレンダー</h2>
           <div className="space-y-6">
             <HealthCalendar
               data={sleepHistory.map((s) => ({ day: s.day, score: s.score }))}
@@ -416,7 +431,7 @@ export default async function UserDetailPage({
 
         {/* Day of week patterns */}
         <div className="card rounded-2xl p-6">
-          <h2 className="text-sm font-bold mb-4">曜日別パターン</h2>
+          <h2 className="text-sm font-bold mb-4">📆 曜日別パターン</h2>
           <div className="grid gap-6 md:grid-cols-2">
             <DayOfWeekChart
               data={sleepHistory.map((s) => ({ day: s.day, score: s.score }))}
@@ -433,9 +448,9 @@ export default async function UserDetailPage({
 
         {/* Activity Timeline */}
         {workouts.length > 0 && (
-          <div className="card rounded-2xl p-6">
+          <div id="activity" className="card rounded-2xl p-6 scroll-mt-12">
             <h2 className="text-sm font-bold mb-4">
-              アクティビティ時間帯
+              🏃 アクティビティ時間帯
               <span className="text-slate-400 font-normal ml-2 text-xs">
                 いつ運動したか
               </span>
@@ -477,7 +492,7 @@ export default async function UserDetailPage({
 
         {/* 90-day history charts */}
         <div className="card rounded-2xl p-6">
-          <h2 className="text-sm font-bold mb-4">スコア推移（90日）</h2>
+          <h2 className="text-sm font-bold mb-4">📈 スコア推移（90日）</h2>
           <div className="space-y-6">
             <HistoryChart
               data={sleepHistory.map((s) => ({ day: s.day, value: s.score }))}
@@ -539,7 +554,7 @@ export default async function UserDetailPage({
         {/* Gen4 data */}
         {(user.spo2 || user.stress || user.resilience || user.cardiovascularAge || user.vo2Max) && (
           <div className="card rounded-2xl p-6">
-            <h2 className="text-sm font-bold mb-4">Gen4データ</h2>
+            <h2 className="text-sm font-bold mb-4">⚡ Gen4データ</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {user.spo2?.spo2_percentage && (
                 <DetailStat label="血中酸素" value={`${user.spo2.spo2_percentage.average}%`} />
@@ -563,7 +578,7 @@ export default async function UserDetailPage({
         {/* Workouts */}
         <div className="card rounded-2xl p-6">
           <h2 className="text-sm font-bold mb-4">
-            ワークアウト履歴
+            💪 ワークアウト履歴
             <span className="text-slate-400 font-normal ml-2 text-xs">
               {workouts.length}件
             </span>

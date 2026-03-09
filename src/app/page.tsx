@@ -54,8 +54,9 @@ export default async function Home() {
             チームウェルネスダッシュボード
           </p>
         </div>
-        <div className="text-xs text-slate-400 font-mono">
-          5分ごとに更新
+        <div className="text-xs text-slate-400 font-mono text-right">
+          <span>{new Date().toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit' })} 時点</span>
+          <span className="ml-2">· 5分ごとに更新</span>
         </div>
       </header>
 
