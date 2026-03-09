@@ -128,7 +128,7 @@ export async function fetchUserDetail(
       ? sleepRecent[sleepRecent.length - 1].day
       : today;
 
-  const historyStart = daysBeforeDate(latestDay, 90);
+  const historyStart = daysBeforeDate(latestDay, 365);
 
   const [
     sleepHistory,

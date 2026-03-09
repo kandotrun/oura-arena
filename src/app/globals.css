@@ -25,11 +25,50 @@ body {
 }
 
 .card-interactive {
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .card-interactive:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   transform: translateY(-1px);
+}
+.card-interactive:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Global button UX — kotobuki style */
+button,
+a[role="button"],
+[role="button"] {
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.2s ease, background-color 0.2s ease;
+}
+
+button:not(:disabled):active,
+a[role="button"]:not(:disabled):active,
+[role="button"]:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Links in cards */
+a.card-interactive {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Interactive badges/pills */
+.score-badge,
+.title-badge {
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+.score-badge:hover,
+.title-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 /* Metric mini card */
@@ -63,4 +102,45 @@ body {
 
 .animate-fade-up-delay {
   animation: fade-up 0.4s ease-out 0.1s both;
+}
+
+/* Smooth focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Stagger animation helpers */
+.animate-stagger-1 { animation-delay: 0.05s; animation-fill-mode: both; }
+.animate-stagger-2 { animation-delay: 0.1s; animation-fill-mode: both; }
+.animate-stagger-3 { animation-delay: 0.15s; animation-fill-mode: both; }
+.animate-stagger-4 { animation-delay: 0.2s; animation-fill-mode: both; }
+
+/* Page transition */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: page-enter 0.3s ease-out;
+}
+
+/* Hover glow effect for key metrics */
+.metric-glow:hover {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Skeleton shimmer for loading states */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
 }
