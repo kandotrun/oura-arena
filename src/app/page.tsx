@@ -3,6 +3,7 @@ import { computePowerLevel } from "@/lib/condition";
 import BattleCard from "@/components/BattleCard";
 import TrendChart from "@/components/TrendChart";
 import WinStreak from "@/components/WinStreak";
+import StressBattle from "@/components/StressBattle";
 import type { UserHealth } from "@/lib/types";
 
 export const revalidate = 300;
@@ -90,6 +91,11 @@ export default async function Home() {
             </span>
           </div>
         )}
+      </div>
+
+      {/* Stress Battle */}
+      <div className="max-w-6xl mx-auto mt-6">
+        <StressBattle users={users} />
       </div>
 
       {/* Trends */}
