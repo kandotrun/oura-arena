@@ -205,7 +205,7 @@ export default async function UserDetailPage({
               {user.name}
             </h1>
             <p className="text-slate-400 text-xs font-mono mt-1">
-              {user.latestDay ?? "—"} · 過去90日のデータ
+              {user.latestDay ?? "—"} · 全{sleepHistory.length}日分のデータ
             </p>
             <div className="mt-2">
               <Titles
