@@ -58,7 +58,7 @@ export default async function Home() {
             <BattleCard user={users[0]} isWinner={false} />
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-5 items-start">
+          <div className="flex flex-col gap-5 max-w-xl mx-auto">
             {users.map((user, i) => (
               <BattleCard
                 key={user.name}
@@ -91,11 +91,7 @@ export default async function Home() {
           <h2 className="text-sm font-semibold text-slate-500 mb-3">
             7日間トレンド
           </h2>
-          <div
-            className={`grid gap-4 ${
-              users.length > 1 ? "lg:grid-cols-2" : "max-w-md mx-auto"
-            }`}
-          >
+          <div className="flex flex-col gap-4 max-w-xl mx-auto">
             {users.map((user, i) => (
               <div key={user.name} className="card p-5">
                 <p className="text-sm font-semibold text-slate-600 mb-2 capitalize">
