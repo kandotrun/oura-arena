@@ -46,8 +46,9 @@ async function fetchOuraUser(name: string, token: string): Promise<UserHealth> {
       }
     }
 
-    const latestDay = sleepRecent.length > 0 ? sleepRecent[sleepRecent.length - 1].day : today;
-    const weekBefore = daysBeforeDate(latestDay, 7);
+    // Use today as fallback for API calls, but track whether real data exists
+    const apiDay = sleepRecent.length > 0 ? sleepRecent[sleepRecent.length - 1].day : today;
+    const weekBefore = daysBeforeDate(apiDay, 7);
 
     const [
       readinessTrend,
@@ -60,21 +61,25 @@ async function fetchOuraUser(name: string, token: string): Promise<UserHealth> {
       cvAgeData,
       vo2Data,
     ] = await Promise.all([
-      fetchDailyReadiness(token, weekBefore, latestDay),
-      fetchDailyActivity(token, weekBefore, latestDay),
-      fetchHeartRate(token, latestDay),
+      fetchDailyReadiness(token, weekBefore, apiDay).catch(() => []),
+      fetchDailyActivity(token, weekBefore, apiDay).catch(() => []),
+      fetchHeartRate(token, apiDay).catch(() => []),
       fetchPersonalInfo(token),
-      fetchDailySpO2(token, daysBeforeDate(latestDay, 1), latestDay).catch(() => []),
-      fetchDailyStress(token, daysBeforeDate(latestDay, 1), latestDay).catch(() => []),
-      fetchDailyResilience(token, daysBeforeDate(latestDay, 1), latestDay).catch(() => []),
-      fetchDailyCardiovascularAge(token, daysBeforeDate(latestDay, 1), latestDay).catch(() => []),
-      fetchVO2Max(token, daysBeforeDate(latestDay, 1), latestDay).catch(() => []),
+      fetchDailySpO2(token, daysBeforeDate(apiDay, 1), apiDay).catch(() => []),
+      fetchDailyStress(token, daysBeforeDate(apiDay, 1), apiDay).catch(() => []),
+      fetchDailyResilience(token, daysBeforeDate(apiDay, 1), apiDay).catch(() => []),
+      fetchDailyCardiovascularAge(token, daysBeforeDate(apiDay, 1), apiDay).catch(() => []),
+      fetchVO2Max(token, daysBeforeDate(apiDay, 1), apiDay).catch(() => []),
     ]);
 
     const sleep = sleepRecent.at(-1) ?? null;
     const readiness = readinessTrend.at(-1) ?? null;
     const activity = activityTrend.at(-1) ?? null;
     const condition = computeCondition(sleep, readiness);
+
+    // Only report latestDay if we actually have data
+    const hasAnyData = sleep || readiness || activity;
+    const latestDay = hasAnyData ? apiDay : null;
 
     return {
       name,

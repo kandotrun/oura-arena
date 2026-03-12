@@ -20,6 +20,10 @@ export default function WinStreak({ users }: Props) {
     computePowerLevel(u.sleep, u.readiness, u.activity)
   );
 
+  // Need at least 2 users with actual data (power > 0)
+  const activePowers = powers.filter((p) => p > 0);
+  if (activePowers.length < 2) return null;
+
   const maxPower = Math.max(...powers);
   const winnerIdx = powers.indexOf(maxPower);
   const isTie = powers.filter((p) => p === maxPower).length > 1;
@@ -27,8 +31,13 @@ export default function WinStreak({ users }: Props) {
   if (isTie || maxPower === 0) return null;
 
   const winner = todayUsers[winnerIdx];
-  const loser = todayUsers[1 - winnerIdx];
-  const diff = powers[winnerIdx] - powers[1 - winnerIdx];
+
+  // Find the runner-up (works for any number of users)
+  const secondPower = Math.max(...powers.filter((_, i) => i !== winnerIdx));
+  const loserIdx = powers.findIndex((p, i) => i !== winnerIdx && p === secondPower);
+  if (loserIdx < 0) return null;
+  const loser = todayUsers[loserIdx];
+  const diff = maxPower - secondPower;
 
   return (
     <div className="card p-4 text-center animate-scale-in animate-pulse-glow">

@@ -42,6 +42,7 @@ export default async function UserDetailPage({
   const { user, sleepHistory, readinessHistory, activityHistory, sleepDetails, sleepDetailsLong, workouts, heartRateDay } = detail;
   const cfg = conditionConfig[user.condition];
   const power = computePowerLevel(user.sleep, user.readiness, user.activity);
+  const hasAnyData = sleepHistory.length > 0 || readinessHistory.length > 0 || activityHistory.length > 0;
 
   // Sleep contributors
   const sleepContribs = user.sleep?.contributors
@@ -252,6 +253,19 @@ export default async function UserDetailPage({
           </div>
         </div>
 
+        {/* No data notice */}
+        {!hasAnyData && (
+          <div className="card rounded-2xl p-8 text-center">
+            <span className="text-4xl mb-3 block">⌚</span>
+            <p className="text-sm font-medium text-slate-600 mb-1">
+              まだデータがありません
+            </p>
+            <p className="text-xs text-slate-400">
+              Oura Ringを装着してデータを同期すると、ここに詳細が表示されます
+            </p>
+          </div>
+        )}
+
         {/* Latest sleep detail */}
         {latestSleepDetail && (
           <div id="sleep" className="card rounded-2xl p-6 scroll-mt-12">
@@ -349,97 +363,105 @@ export default async function UserDetailPage({
         )}
 
         {/* Vitals: HRV, Breathing, Resting HR, Restless */}
-        <div id="vitals" className="card rounded-2xl p-6 scroll-mt-12">
-          <h2 className="text-sm font-bold mb-4">💓 バイタルトレンド</h2>
-          <div className="space-y-6">
-            {hrvTrend.length > 0 && (
-              <HistoryChart
-                data={hrvTrend}
-                color="#8b5cf6"
-                title="HRV（心拍変動）"
-                unit="ms"
-                domain={[0, Math.max(...hrvTrend.map((d) => d.value ?? 0), 100)]}
-              />
-            )}
-            {restingHRTrend.length > 0 && (
-              <HistoryChart
-                data={restingHRTrend}
-                color="#ec4899"
-                title="安静時心拍"
-                unit="bpm"
-                domain={[
-                  Math.max(0, Math.min(...restingHRTrend.map((d) => d.value ?? 100)) - 5),
-                  Math.max(...restingHRTrend.map((d) => d.value ?? 0)) + 5,
-                ]}
-              />
-            )}
-            {breathTrend.length > 0 && (
-              <HistoryChart
-                data={breathTrend}
-                color="#06b6d4"
-                title="呼吸数"
-                unit="回/分"
-                domain={[
-                  Math.max(0, Math.min(...breathTrend.map((d) => d.value ?? 20)) - 2),
-                  Math.max(...breathTrend.map((d) => d.value ?? 0)) + 2,
-                ]}
-              />
-            )}
-            {restlessTrend.length > 0 && (
-              <HistoryChart
-                data={restlessTrend}
-                color="#f59e0b"
-                title="中途覚醒回数"
-                unit="回"
-                domain={[0, Math.max(...restlessTrend.map((d) => d.value ?? 0), 30)]}
-              />
-            )}
+        {(hrvTrend.length > 0 || restingHRTrend.length > 0 || breathTrend.length > 0 || restlessTrend.length > 0) && (
+          <div id="vitals" className="card rounded-2xl p-6 scroll-mt-12">
+            <h2 className="text-sm font-bold mb-4">💓 バイタルトレンド</h2>
+            <div className="space-y-6">
+              {hrvTrend.length > 0 && (
+                <HistoryChart
+                  data={hrvTrend}
+                  color="#8b5cf6"
+                  title="HRV（心拍変動）"
+                  unit="ms"
+                  domain={[0, Math.max(...hrvTrend.map((d) => d.value ?? 0), 100)]}
+                />
+              )}
+              {restingHRTrend.length > 0 && (
+                <HistoryChart
+                  data={restingHRTrend}
+                  color="#ec4899"
+                  title="安静時心拍"
+                  unit="bpm"
+                  domain={[
+                    Math.max(0, Math.min(...restingHRTrend.map((d) => d.value ?? 100)) - 5),
+                    Math.max(...restingHRTrend.map((d) => d.value ?? 0)) + 5,
+                  ]}
+                />
+              )}
+              {breathTrend.length > 0 && (
+                <HistoryChart
+                  data={breathTrend}
+                  color="#06b6d4"
+                  title="呼吸数"
+                  unit="回/分"
+                  domain={[
+                    Math.max(0, Math.min(...breathTrend.map((d) => d.value ?? 20)) - 2),
+                    Math.max(...breathTrend.map((d) => d.value ?? 0)) + 2,
+                  ]}
+                />
+              )}
+              {restlessTrend.length > 0 && (
+                <HistoryChart
+                  data={restlessTrend}
+                  color="#f59e0b"
+                  title="中途覚醒回数"
+                  unit="回"
+                  domain={[0, Math.max(...restlessTrend.map((d) => d.value ?? 0), 30)]}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Personal Bests */}
-        <div id="bests" className="card rounded-2xl p-6 scroll-mt-12">
-          <h2 className="text-sm font-bold mb-4">🏆 パーソナルベスト</h2>
-          <PersonalBests
-            sleepHistory={sleepHistory}
-            activityHistory={activityHistory}
-            sleepDetails={sleepDetailsLong}
-          />
-        </div>
+        {hasAnyData && (
+          <div id="bests" className="card rounded-2xl p-6 scroll-mt-12">
+            <h2 className="text-sm font-bold mb-4">🏆 パーソナルベスト</h2>
+            <PersonalBests
+              sleepHistory={sleepHistory}
+              activityHistory={activityHistory}
+              sleepDetails={sleepDetailsLong}
+            />
+          </div>
+        )}
 
         {/* Health Calendar */}
-        <div id="calendar" className="card rounded-2xl p-6 scroll-mt-12">
-          <h2 className="text-sm font-bold mb-4">📅 体調カレンダー</h2>
-          <div className="space-y-6">
-            <HealthCalendar
-              data={sleepHistory.map((s) => ({ day: s.day, score: s.score }))}
-              title="睡眠スコア"
-            />
-            {activityHistory.length > 0 && (
+        {hasAnyData && (
+          <div id="calendar" className="card rounded-2xl p-6 scroll-mt-12">
+            <h2 className="text-sm font-bold mb-4">📅 体調カレンダー</h2>
+            <div className="space-y-6">
               <HealthCalendar
-                data={activityHistory.map((a) => ({ day: a.day, score: a.score }))}
-                title="活動スコア"
+                data={sleepHistory.map((s) => ({ day: s.day, score: s.score }))}
+                title="睡眠スコア"
               />
-            )}
+              {activityHistory.length > 0 && (
+                <HealthCalendar
+                  data={activityHistory.map((a) => ({ day: a.day, score: a.score }))}
+                  title="活動スコア"
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Day of week patterns */}
-        <div className="card rounded-2xl p-6">
-          <h2 className="text-sm font-bold mb-4">📆 曜日別パターン</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <DayOfWeekChart
-              data={sleepHistory.map((s) => ({ day: s.day, score: s.score }))}
-              title="睡眠スコア"
-              color="#6366f1"
-            />
-            <DayOfWeekChart
-              data={activityHistory.map((a) => ({ day: a.day, score: a.score }))}
-              title="活動スコア"
-              color="#f59e0b"
-            />
+        {hasAnyData && (
+          <div className="card rounded-2xl p-6">
+            <h2 className="text-sm font-bold mb-4">📆 曜日別パターン</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <DayOfWeekChart
+                data={sleepHistory.map((s) => ({ day: s.day, score: s.score }))}
+                title="睡眠スコア"
+                color="#6366f1"
+              />
+              <DayOfWeekChart
+                data={activityHistory.map((a) => ({ day: a.day, score: a.score }))}
+                title="活動スコア"
+                color="#f59e0b"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Activity Timeline */}
         {workouts.length > 0 && (
@@ -455,78 +477,84 @@ export default async function UserDetailPage({
         )}
 
         {/* Contributors radar charts */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {sleepContribs.length > 0 && (
-            <div className="card rounded-2xl p-5">
-              <ContributorsChart
-                data={sleepContribs}
-                color="#6366f1"
-                title="睡眠スコア要因"
-              />
-            </div>
-          )}
-          {readinessContribs.length > 0 && (
-            <div className="card rounded-2xl p-5">
-              <ContributorsChart
-                data={readinessContribs}
-                color="#10b981"
-                title="回復スコア要因"
-              />
-            </div>
-          )}
-          {activityContribs.length > 0 && (
-            <div className="card rounded-2xl p-5">
-              <ContributorsChart
-                data={activityContribs}
-                color="#f59e0b"
-                title="活動スコア要因"
-              />
-            </div>
-          )}
-        </div>
+        {(sleepContribs.length > 0 || readinessContribs.length > 0 || activityContribs.length > 0) && (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sleepContribs.length > 0 && (
+              <div className="card rounded-2xl p-5">
+                <ContributorsChart
+                  data={sleepContribs}
+                  color="#6366f1"
+                  title="睡眠スコア要因"
+                />
+              </div>
+            )}
+            {readinessContribs.length > 0 && (
+              <div className="card rounded-2xl p-5">
+                <ContributorsChart
+                  data={readinessContribs}
+                  color="#10b981"
+                  title="回復スコア要因"
+                />
+              </div>
+            )}
+            {activityContribs.length > 0 && (
+              <div className="card rounded-2xl p-5">
+                <ContributorsChart
+                  data={activityContribs}
+                  color="#f59e0b"
+                  title="活動スコア要因"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 90-day history charts */}
-        <div className="card rounded-2xl p-6">
-          <h2 className="text-sm font-bold mb-4">📈 スコア推移（90日）</h2>
-          <div className="space-y-6">
-            <HistoryChart
-              data={sleepHistory.map((s) => ({ day: s.day, value: s.score }))}
-              color="#6366f1"
-              title="睡眠スコア"
-            />
-            <HistoryChart
-              data={readinessHistory.map((r) => ({ day: r.day, value: r.score }))}
-              color="#10b981"
-              title="回復スコア"
-            />
-            <HistoryChart
-              data={activityHistory.map((a) => ({ day: a.day, value: a.score }))}
-              color="#f59e0b"
-              title="活動スコア"
-            />
+        {hasAnyData && (
+          <div className="card rounded-2xl p-6">
+            <h2 className="text-sm font-bold mb-4">📈 スコア推移（90日）</h2>
+            <div className="space-y-6">
+              <HistoryChart
+                data={sleepHistory.map((s) => ({ day: s.day, value: s.score }))}
+                color="#6366f1"
+                title="睡眠スコア"
+              />
+              <HistoryChart
+                data={readinessHistory.map((r) => ({ day: r.day, value: r.score }))}
+                color="#10b981"
+                title="回復スコア"
+              />
+              <HistoryChart
+                data={activityHistory.map((a) => ({ day: a.day, value: a.score }))}
+                color="#f59e0b"
+                title="活動スコア"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Steps & Calories history */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="card rounded-2xl p-6">
-            <HistoryChart
-              data={activityHistory.map((a) => ({ day: a.day, value: a.steps }))}
-              color="#8b5cf6"
-              title="歩数"
-              domain={[0, Math.max(...activityHistory.map((a) => a.steps), 10000)]}
-            />
+        {activityHistory.length > 0 && (
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="card rounded-2xl p-6">
+              <HistoryChart
+                data={activityHistory.map((a) => ({ day: a.day, value: a.steps }))}
+                color="#8b5cf6"
+                title="歩数"
+                domain={[0, Math.max(...activityHistory.map((a) => a.steps), 10000)]}
+              />
+            </div>
+            <div className="card rounded-2xl p-6">
+              <HistoryChart
+                data={activityHistory.map((a) => ({ day: a.day, value: a.active_calories }))}
+                color="#f43f5e"
+                title="消費カロリー"
+                unit="kcal"
+                domain={[0, Math.max(...activityHistory.map((a) => a.active_calories), 500)]}
+              />
+            </div>
           </div>
-          <div className="card rounded-2xl p-6">
-            <HistoryChart
-              data={activityHistory.map((a) => ({ day: a.day, value: a.active_calories }))}
-              color="#f43f5e"
-              title="消費カロリー"
-              unit="kcal"
-              domain={[0, Math.max(...activityHistory.map((a) => a.active_calories), 500)]}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Temperature deviation */}
         {readinessHistory.some((r) => r.temperature_deviation != null) && (

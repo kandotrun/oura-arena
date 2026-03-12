@@ -44,6 +44,25 @@ export default function BattleCard({ user, isWinner }: BattleCardProps) {
     );
   }
 
+  // No data at all (new user who hasn't synced yet)
+  const hasNoData = !user.sleep && !user.readiness && !user.activity;
+  if (hasNoData) {
+    return (
+      <div className="card p-6 flex-1 animate-fade-up">
+        <h2 className="text-lg font-bold capitalize mb-2">{user.name}</h2>
+        <div className="flex flex-col items-center justify-center py-6 text-center">
+          <span className="text-3xl mb-3">⌚</span>
+          <p className="text-sm font-medium text-slate-600 mb-1">
+            まだデータがありません
+          </p>
+          <p className="text-xs text-slate-400">
+            Oura Ringを装着してデータを同期してください
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // 2日以上前のデータの場合は同期促すカードを表示
   const now = new Date();
   const yesterdayStr = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);

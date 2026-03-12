@@ -98,8 +98,7 @@ export function computeTitles(
   const steps30 = recent30Activity.map((a) => a.steps);
   const avgSteps7 = avg(steps7);
   const avgSteps30 = avg(steps30);
-  const maxSteps = Math.max(...activityHistory.map((a) => a.steps), 0);
-  const maxStepsDay = activityHistory.reduce((best, a) => a.steps > (best?.steps ?? 0) ? a : best, activityHistory[0]);
+  const maxSteps = activityHistory.length > 0 ? Math.max(...activityHistory.map((a) => a.steps)) : 0;
 
   const cals7 = recent7Activity.map((a) => a.active_calories);
   const avgCals7 = avg(cals7);

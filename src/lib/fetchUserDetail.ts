@@ -109,109 +109,143 @@ export async function fetchUserDetail(
   const { token } = userConfig;
   const today = formatDate(new Date());
 
-  // Find latest data
-  let sleepRecent = await fetchDailySleep(token, daysAgo(7), today);
-  if (sleepRecent.length === 0) {
-    const probe = await fetchDailySleep(token, daysAgo(365), today);
-    if (probe.length > 0) {
-      const latestDay = probe[probe.length - 1].day;
-      sleepRecent = await fetchDailySleep(
-        token,
-        daysBeforeDate(latestDay, 7),
-        latestDay
-      );
+  try {
+    // Find latest data
+    let sleepRecent = await fetchDailySleep(token, daysAgo(7), today).catch(() => []);
+    if (sleepRecent.length === 0) {
+      const probe = await fetchDailySleep(token, daysAgo(365), today).catch(() => []);
+      if (probe.length > 0) {
+        const latestDay = probe[probe.length - 1].day;
+        sleepRecent = await fetchDailySleep(
+          token,
+          daysBeforeDate(latestDay, 7),
+          latestDay
+        ).catch(() => []);
+      }
     }
-  }
 
-  const latestDay =
-    sleepRecent.length > 0
-      ? sleepRecent[sleepRecent.length - 1].day
-      : today;
+    const latestDay =
+      sleepRecent.length > 0
+        ? sleepRecent[sleepRecent.length - 1].day
+        : today;
 
-  const historyStart = "2020-01-01"; // 全期間取得
+    const historyStart = "2020-01-01"; // 全期間取得
 
-  const [
-    sleepHistory,
-    readinessHistory,
-    activityHistory,
-    heartRateDay,
-    personalInfo,
-    sleepDetails,
-    workouts,
-    spo2Data,
-    stressData,
-    resilienceData,
-    cvAgeData,
-    vo2Data,
-  ] = await Promise.all([
-    fetchDailySleep(token, historyStart, latestDay),
-    fetchDailyReadiness(token, historyStart, latestDay),
-    fetchDailyActivity(token, historyStart, latestDay),
-    fetchHeartRate(token, latestDay),
-    fetchPersonalInfo(token),
-    ouraFetchRaw<SleepDetail>("sleep", token, {
-      start_date: daysBeforeDate(latestDay, 7),
-      end_date: latestDay,
-    }),
-    ouraFetchRaw<WorkoutEntry>("workout", token, {
-      start_date: historyStart,
-      end_date: latestDay,
-    }),
-    fetchDailySpO2(token, daysBeforeDate(latestDay, 1), latestDay).catch(
-      () => []
-    ),
-    fetchDailyStress(token, daysBeforeDate(latestDay, 1), latestDay).catch(
-      () => []
-    ),
-    fetchDailyResilience(
-      token,
-      daysBeforeDate(latestDay, 1),
-      latestDay
-    ).catch(() => []),
-    fetchDailyCardiovascularAge(
-      token,
-      daysBeforeDate(latestDay, 1),
-      latestDay
-    ).catch(() => []),
-    fetchVO2Max(token, daysBeforeDate(latestDay, 1), latestDay).catch(
-      () => []
-    ),
-  ]);
-
-  const sleep = sleepHistory.at(-1) ?? null;
-  const readiness = readinessHistory.at(-1) ?? null;
-  const activity = activityHistory.at(-1) ?? null;
-  const condition = computeCondition(sleep, readiness);
-
-  return {
-    user: {
-      name: userConfig.name,
+    const [
+      sleepHistory,
+      readinessHistory,
+      activityHistory,
+      heartRateDay,
       personalInfo,
-      sleep,
-      readiness,
-      activity,
-      heartRate: heartRateDay,
-      spo2: spo2Data.at(-1) ?? null,
-      stress: stressData.at(-1) ?? null,
-      resilience: resilienceData.at(-1) ?? null,
-      cardiovascularAge: cvAgeData.at(-1) ?? null,
-      vo2Max: vo2Data.at(-1) ?? null,
-      sleepTrend: sleepRecent,
-      readinessTrend: [],
-      condition,
-      latestDay,
-    },
-    sleepHistory,
-    readinessHistory,
-    activityHistory,
-    sleepDetails: sleepDetails.filter((s) => s.type === "long_sleep" || s.type === "sleep"),
-    sleepDetailsLong: await ouraFetchRaw<SleepDetail>("sleep", token, {
+      sleepDetails,
+      workouts,
+      spo2Data,
+      stressData,
+      resilienceData,
+      cvAgeData,
+      vo2Data,
+    ] = await Promise.all([
+      fetchDailySleep(token, historyStart, latestDay).catch(() => []),
+      fetchDailyReadiness(token, historyStart, latestDay).catch(() => []),
+      fetchDailyActivity(token, historyStart, latestDay).catch(() => []),
+      fetchHeartRate(token, latestDay).catch(() => []),
+      fetchPersonalInfo(token),
+      ouraFetchRaw<SleepDetail>("sleep", token, {
+        start_date: daysBeforeDate(latestDay, 7),
+        end_date: latestDay,
+      }),
+      ouraFetchRaw<WorkoutEntry>("workout", token, {
+        start_date: historyStart,
+        end_date: latestDay,
+      }),
+      fetchDailySpO2(token, daysBeforeDate(latestDay, 1), latestDay).catch(
+        () => []
+      ),
+      fetchDailyStress(token, daysBeforeDate(latestDay, 1), latestDay).catch(
+        () => []
+      ),
+      fetchDailyResilience(
+        token,
+        daysBeforeDate(latestDay, 1),
+        latestDay
+      ).catch(() => []),
+      fetchDailyCardiovascularAge(
+        token,
+        daysBeforeDate(latestDay, 1),
+        latestDay
+      ).catch(() => []),
+      fetchVO2Max(token, daysBeforeDate(latestDay, 1), latestDay).catch(
+        () => []
+      ),
+    ]);
+
+    const sleep = sleepHistory.at(-1) ?? null;
+    const readiness = readinessHistory.at(-1) ?? null;
+    const activity = activityHistory.at(-1) ?? null;
+    const condition = computeCondition(sleep, readiness);
+    const hasAnyData = sleep || readiness || activity;
+
+    const sleepDetailsLong = await ouraFetchRaw<SleepDetail>("sleep", token, {
       start_date: historyStart,
       end_date: latestDay,
-    }).then((d) => d.filter((s) => s.type === "long_sleep" || s.type === "sleep")),
-    workouts,
-    heartRateDay,
-  };
+    }).then((d) => d.filter((s) => s.type === "long_sleep" || s.type === "sleep"));
+
+    return {
+      user: {
+        name: userConfig.name,
+        personalInfo,
+        sleep,
+        readiness,
+        activity,
+        heartRate: heartRateDay,
+        spo2: spo2Data.at(-1) ?? null,
+        stress: stressData.at(-1) ?? null,
+        resilience: resilienceData.at(-1) ?? null,
+        cardiovascularAge: cvAgeData.at(-1) ?? null,
+        vo2Max: vo2Data.at(-1) ?? null,
+        sleepTrend: sleepRecent,
+        readinessTrend: [],
+        condition,
+        latestDay: hasAnyData ? latestDay : null,
+      },
+      sleepHistory,
+      readinessHistory,
+      activityHistory,
+      sleepDetails: sleepDetails.filter((s) => s.type === "long_sleep" || s.type === "sleep"),
+      sleepDetailsLong,
+      workouts,
+      heartRateDay,
+    };
+  } catch {
+    // Return empty data structure on API failure
+    return {
+      user: {
+        name: userConfig.name,
+        personalInfo: null,
+        sleep: null,
+        readiness: null,
+        activity: null,
+        heartRate: [],
+        spo2: null,
+        stress: null,
+        resilience: null,
+        cardiovascularAge: null,
+        vo2Max: null,
+        sleepTrend: [],
+        readinessTrend: [],
+        condition: "fair",
+        latestDay: null,
+        error: "データの取得に失敗しました",
+      },
+      sleepHistory: [],
+      readinessHistory: [],
+      activityHistory: [],
+      sleepDetails: [],
+      sleepDetailsLong: [],
+      workouts: [],
+      heartRateDay: [],
+    };
+  }
 }
 
 export async function getAvailableUsers(): Promise<string[]> {
