@@ -76,7 +76,7 @@ export default async function Home() {
             <BattleCard user={users[0]} isWinner={false} />
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-5 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {users.map((user, i) => (
               <BattleCard
                 key={user.name}
